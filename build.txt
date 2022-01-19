@@ -1,0 +1,3 @@
+displayName = Faye's Quick Buy
+author = Faye#1519
+version = 0.1

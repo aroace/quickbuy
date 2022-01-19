@@ -1,0 +1,13 @@
+Faye's Quick Buy permits buying a large amount of items quickly through NPs via keybindings
+
+- Quick Stack
+    -> Default keybinding is LeftShift
+    -> Buys the item you're hovering on
+    -> It is VERY fast
+
+- Quick Buy Stack
+    -> Default keybinding is LeftCtrl
+    -> Buys a max stack of the item you're hovering on
+    -> Per press
+
+Why? I wanted to invest in silt more efficiently and the normal buying process just didn't cut it out for me.
