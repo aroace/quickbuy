@@ -24,7 +24,7 @@ namespace FayeQB
             Hotkeys.Clear();
             Hotkeys = null;
 
-            Logger.InfoFormat("[0] Unloaded; cleared static references correctly.", DisplayName);
+            Logger.InfoFormat("[{0}] Unloaded; cleared static references correctly.", DisplayName);
         }
     }
 
@@ -38,6 +38,7 @@ namespace FayeQB
             if (stack) return player.CanBuyItem(value * Main.HoverItem.maxStack);
             return player.CanBuyItem(value);
         }
+        
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
             // Checks if a shop is open or if the item you're hovering on is an item you can buy
