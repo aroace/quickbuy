@@ -57,27 +57,19 @@ namespace FayeQB
             // Also, the <Item>.buy property should really have been documented.
             if (Main.npcShop < 0 || !Main.HoverItem.buy) return;
 
-            if (FayeQB.Hotkeys["Quick Buy"].Current) PlayerBuyItem(multiplier: FayeQB.Config.QuickBuyAmount);
-            if (FayeQB.Hotkeys["Quick Buy Stack"].JustPressed) PlayerBuyItem(stack: true);
+            if (FayeQB.Hotkeys["Quick Buy"].Current) PlayerBuyItem(amount: FayeQB.Config.QuickBuyAmount);
+            if (FayeQB.Hotkeys["Quick Buy Stack"].JustPressed) PlayerBuyItem(amount: Main.HoverItem.maxStack);
         }
 
         // Utility method to tidy up the code
-        private void PlayerBuyItem(bool stack = false, int multiplier = 1)
+        private void PlayerBuyItem(int amount = 1)
         {
-            int value = Main.HoverItem.GetStoreValue();
-            int maxStack = Main.HoverItem.maxStack;
+            int value = Main.HoverItem.GetStoreValue() * amount;
 
-            if (!player.CanBuyItem(stack ? value * maxStack : value * multiplier)) return;
+            if (!player.CanBuyItem(value)) return;
 
-            if (stack)
-            {
-                player.BuyItem(value * maxStack);
-                player.QuickSpawnItem(Main.HoverItem, maxStack);
-                return;
-            }
-
-            player.BuyItem(value * multiplier);
-            player.QuickSpawnItem(Main.HoverItem, multiplier);
+            player.BuyItem(value);
+            player.QuickSpawnItem(Main.HoverItem, amount);
         }
     }
 }
