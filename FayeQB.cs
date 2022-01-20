@@ -1,14 +1,17 @@
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework.Input;
-using Terraria.GameInput;
 using Terraria;
+using Terraria.GameInput;
+using Terraria.ModLoader;
+using System.ComponentModel;
+using Terraria.ModLoader.Config;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Input;
 
 namespace FayeQB
 {
     public class FayeQB : Mod
     {
         public static Dictionary<string, ModHotKey> Hotkeys;
+        public static Configuration Config;
 
         public override void Load()
         {
@@ -23,22 +26,30 @@ namespace FayeQB
         {
             Hotkeys.Clear();
             Hotkeys = null;
+            Config = null;
 
             Logger.InfoFormat("[{0}] Unloaded; cleared static references correctly.", DisplayName);
         }
     }
 
+    public class Configuration : ModConfig
+    {
+        public override ConfigScope Mode => ConfigScope.ClientSide;
+
+        public override void OnLoaded()
+        {
+            FayeQB.Config = this;
+        }
+
+        [DefaultValue(1)]
+        [Label("Quick Buy Amount")]
+        [Tooltip("The amount of blocks bought per trigger.")]
+        public int QuickBuyAmount { get; set; }
+    }
+
     public class Player : ModPlayer
     {
 
-        private bool PlayerCanBuyCalculatedPrice(bool stack = false)
-        {
-            int value = Main.HoverItem.GetStoreValue();
-
-            if (stack) return player.CanBuyItem(value * Main.HoverItem.maxStack);
-            return player.CanBuyItem(value);
-        }
-        
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
             // Checks if a shop is open or if the item you're hovering on is an item you can buy
@@ -46,17 +57,27 @@ namespace FayeQB
             // Also, the <Item>.buy property should really have been documented.
             if (Main.npcShop < 0 || !Main.HoverItem.buy) return;
 
-            if (FayeQB.Hotkeys["Quick Buy"].Current && PlayerCanBuyCalculatedPrice())
+            if (FayeQB.Hotkeys["Quick Buy"].Current) PlayerBuyItem(multiplier: FayeQB.Config.QuickBuyAmount);
+            if (FayeQB.Hotkeys["Quick Buy Stack"].JustPressed) PlayerBuyItem(stack: true);
+        }
+
+        // Utility method to tidy up the code
+        private void PlayerBuyItem(bool stack = false, int multiplier = 1)
+        {
+            int value = Main.HoverItem.GetStoreValue();
+            int maxStack = Main.HoverItem.maxStack;
+
+            if (!player.CanBuyItem(stack ? value * maxStack : value * multiplier)) return;
+
+            if (stack)
             {
-                player.QuickSpawnItem(Main.HoverItem);
-                player.BuyItem(Main.HoverItem.GetStoreValue());
+                player.BuyItem(value * maxStack);
+                player.QuickSpawnItem(Main.HoverItem, maxStack);
+                return;
             }
 
-            if (FayeQB.Hotkeys["Quick Buy Stack"].JustPressed && PlayerCanBuyCalculatedPrice(stack: true))
-            {
-                player.QuickSpawnItem(Main.HoverItem, Main.HoverItem.maxStack);
-                player.BuyItem(Main.HoverItem.GetStoreValue() * Main.HoverItem.maxStack);
-            }
+            player.BuyItem(value * multiplier);
+            player.QuickSpawnItem(Main.HoverItem, multiplier);
         }
     }
 }
